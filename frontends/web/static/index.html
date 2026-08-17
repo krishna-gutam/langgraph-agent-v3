@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LangGraph Coding Agent</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>🤖</text></svg>" />
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <header class="sidebar-head">
+        <h1>Coding Agent</h1>
+        <p class="cwd" id="cwd">&nbsp;</p>
+      </header>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Conversations</h2>
+          <button class="btn small" id="new-thread">New</button>
+        </div>
+        <ul class="threads" id="threads"></ul>
+      </section>
+
+      <section class="panel">
+        <h2>Autopilot</h2>
+        <textarea id="goal" rows="3" placeholder="Goal for the Overseer to drive toward…"></textarea>
+        <label class="check">
+          <input type="checkbox" id="auto-approve" checked />
+          Auto-approve tools
+        </label>
+        <label class="check">
+          Stop after
+          <input type="number" id="steps" min="1" max="99" value="10" />
+          steps
+        </label>
+        <div class="row">
+          <button class="btn primary" id="overseer-start">Start</button>
+          <button class="btn" id="overseer-stop" disabled>Stop</button>
+        </div>
+        <p class="hint" id="overseer-status">Idle.</p>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Notes</h2>
+          <button class="btn small" id="save-notes">Save</button>
+        </div>
+        <textarea id="notes" rows="5" placeholder="Scratch notes for this project…"></textarea>
+      </section>
+
+      <section class="panel">
+        <h2>History</h2>
+        <div class="row wrap">
+          <button class="btn small" id="undo-last">Undo last turn</button>
+          <button class="btn small" id="undo-first">Drop first turn</button>
+          <button class="btn small danger" id="clear-history">Clear</button>
+        </div>
+      </section>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="tabs">
+          <button class="tab active" data-view="chat">Chat</button>
+          <button class="tab" data-view="files">Files</button>
+        </div>
+        <div class="meta">
+          <span class="pill" id="status-pill">connecting…</span>
+          <span class="pill muted" id="tokens">0 tokens</span>
+        </div>
+      </header>
+
+      <section class="view active" id="view-chat">
+        <div class="transcript" id="transcript"></div>
+
+        <div class="approval hidden" id="approval">
+          <h3>Approve tool calls?</h3>
+          <div id="approval-calls"></div>
+          <input id="feedback" type="text" placeholder="Or reply to the agent instead of running it…" />
+          <div class="row">
+            <button class="btn primary" id="approve">Approve &amp; run</button>
+            <button class="btn" id="send-feedback">Send reply</button>
+            <button class="btn danger" id="deny">Deny</button>
+          </div>
+        </div>
+
+        <form class="composer" id="composer">
+          <textarea id="prompt" rows="1" placeholder="Ask the agent to do something… (Enter to send, Shift+Enter for a newline)"></textarea>
+          <button class="btn primary" id="send" type="submit">Send</button>
+        </form>
+      </section>
+
+      <section class="view" id="view-files">
+        <div class="files">
+          <div class="file-list">
+            <input id="file-filter" type="search" placeholder="Filter files…" />
+            <ul id="file-tree"></ul>
+          </div>
+          <div class="file-editor">
+            <div class="panel-head">
+              <h2 id="open-file">No file open</h2>
+              <button class="btn small primary" id="save-file" disabled>Save</button>
+            </div>
+            <textarea id="file-content" spellcheck="false" placeholder="Pick a file on the left."></textarea>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast hidden" id="toast"></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>

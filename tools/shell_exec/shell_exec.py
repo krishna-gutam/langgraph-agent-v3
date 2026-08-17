@@ -148,13 +148,13 @@ def run_powershell(script: str, justification: str) -> str:
         output = result.stdout.strip()
         error = result.stderr.strip()
         if output:
-            return output[:2000]
+            return output[:40000]
         if error:
-            return f"Error: {error[:2000]}"
+            return f"Error: {error[:40000]}"
         return "Command executed successfully (no output)."
 
     except subprocess.TimeoutExpired:
         return "Error: Command timed out after 60 seconds. It may be stuck in an infinite loop."
     except subprocess.CalledProcessError as e:
         error_msg = e.stderr.strip() or e.stdout.strip()
-        return f"Error: {error_msg[:2000]}"
+        return f"Error: {error_msg[:40000]}"

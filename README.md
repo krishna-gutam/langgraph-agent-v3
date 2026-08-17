@@ -5,6 +5,7 @@ A powerful, modular, and autonomous AI coding assistant built with **LangGraph**
 ## 🚀 Key Features
 
 *   **Interactive Streamlit UI**: A full-featured web interface for chatting, file editing, managing conversation history, and monitoring agent activity.
+*   **Web UI (FastAPI)**: A dependency-free HTML/CSS/JS front end served by FastAPI, with streaming replies, tool approval, conversation history, and a file editor.
 *   **CLI Interface**: A lightweight, terminal-based interface for quick tasks.
 *   **Overseer (Autopilot) Mode**: A meta-agent that acts as a proxy for the user. It plans, steers, and verifies the coding agent's work toward a specific goal, pausing only when human intervention is required.
 *   **Sophisticated Tooling**:
@@ -47,8 +48,11 @@ backend/            no UI framework is imported here
   workspace.py      data dirs, SQLite checkpoints, threads, projects, notes
   session.py        AgentSession + Overseer - the API a frontend calls
 frontends/
-  streamlit_app.py  the web UI
+  streamlit_app.py  the Streamlit web UI
   cli.py            the terminal UI
+  web/              the FastAPI web UI
+    api.py          HTTP + SSE endpoints over AgentSession
+    static/         index.html, styles.css, app.js (no build step, no CDN)
 main.py             launcher: streamlit run main.py
 cli.py              launcher: python cli.py
 ```
@@ -90,6 +94,31 @@ streamlit run main.py
 *   **Chat**: Interact with the agent directly.
 *   **Editor**: Load, edit, and save files directly from the browser.
 *   **Overseer**: Set a goal and let the agent work autonomously.
+
+### FastAPI web UI
+A browser UI with no build step - plain HTML, CSS and JavaScript served by FastAPI:
+```bash
+python -m frontends.web            # http://127.0.0.1:8000
+uvicorn frontends.web:app --reload # same thing, with reload
+```
+`WEB_HOST`, `WEB_PORT` and `WEB_RELOAD` override the defaults. The UI covers
+chat (streamed over Server-Sent Events), tool approval / denial / replying to a
+tool call, conversation switching and deletion, undo and clear, notes, the
+Overseer, and a file browser and editor.
+
+The Overseer panel mirrors `python cli.py --goal ... --steps N`: give it a goal,
+a step limit, and whether tools are auto-approved. With auto-approve on it runs
+unattended (the CLI's behaviour); with it off the run parks at each tool call
+and resumes when you approve. Denying a call stops the run, since the turn it
+came from is discarded.
+
+The JSON API underneath is usable on its own: `GET /api/state`,
+`POST /api/chat`, `POST /api/tools/{approve,deny,feedback}`,
+`GET|POST /api/threads/*`, `POST /api/history/*`, `POST /api/overseer/*`,
+`GET|POST /api/files` and `/api/notes`.
+
+> It serves a local coding agent with no authentication and binds to localhost.
+> Do not expose it to a network you do not control.
 
 ### CLI
 For quick, terminal-based interactions:
